@@ -12,15 +12,9 @@ import io.quarkus.hibernate.reactive.panache.PanacheQuery;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.common.annotation.Blocking;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.subscription.Cancellable;
 import jakarta.inject.Inject;
-import jakarta.persistence.Cacheable;
-import jakarta.transaction.Transactional;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.net.URI;
