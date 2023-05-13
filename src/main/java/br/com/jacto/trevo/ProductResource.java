@@ -2,16 +2,20 @@ package br.com.jacto.trevo;
 
 import br.com.jacto.trevo.dto.product.ProductDetailDto;
 import br.com.jacto.trevo.dto.product.ProductDto;
+import br.com.jacto.trevo.model.OrderItem;
 import br.com.jacto.trevo.repository.ProductRepository;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.reactive.messaging.kafka.Record;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import br.com.jacto.trevo.model.Product;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.hibernate.reactive.mutiny.Mutiny;
+import org.jboss.logging.Logger;
 
 import java.net.URI;
 import java.util.List;
@@ -49,4 +53,15 @@ public class ProductResource {
         return productRepository.deleteById(id).onItem().transform(delete -> delete ? Response.noContent().build() :
                 Response.status(Response.Status.NOT_FOUND).build());
     }
+
+
+    private final Logger logger = Logger.getLogger(OrderItem.class);
+
+    @Incoming("products-in")
+    public void receive(Record<UUID, String> record) {
+        System.out.println(record.key());
+        System.out.println(record.value());
+    }
+
+
 }

@@ -7,15 +7,19 @@ import br.com.jacto.trevo.model.OrderItem;
 import br.com.jacto.trevo.model.Product;
 import br.com.jacto.trevo.repository.OrderItemRepository;
 import br.com.jacto.trevo.repository.ProductRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.PanacheQuery;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.common.annotation.Blocking;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.reactive.messaging.kafka.Record;
 import jakarta.inject.Inject;
 import jakarta.validation.Validator;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -35,8 +39,8 @@ public class OrderItemResource {
     @Inject
     ProductRepository productRepository;
 
-    @Inject
-    Validator validator;
+    @Inject @Channel("products-out")
+    Emitter<Record<UUID, String>> emitter;
 
     @GET
     public Uni<List<OrderDto>> get() {
@@ -55,7 +59,8 @@ public class OrderItemResource {
                 .onItem().transformToUni(product -> {
                     OrderItem newOrderItem = new OrderItem(order.getClientName(), order.getClientName(), order.getPhone(), product);
                     return Panache.withTransaction(newOrderItem::persist)
-                            .replaceWith(Response.created(URI.create("/order/" + newOrderItem.getOrderItemId())).build());
+                            .replaceWith(Response.created(URI.create("/order/" + newOrderItem.getOrderItemId())).build())
+                            .onItem().invoke(() -> sendMovieToKafka(newOrderItem));
                 });
     }
 
@@ -65,6 +70,15 @@ public class OrderItemResource {
     public Uni<Response> delete(UUID id) {
         return orderItemRepository.deleteById(id).onItem().transform(delete -> delete ? Response.noContent().build() :
                 Response.status(Response.Status.NOT_FOUND).build());
+    }
+
+    public void sendMovieToKafka(OrderItem orderItem) {
+        try {
+            String orderString =OrderItem.convertToString(orderItem);
+            emitter.send(Record.of(UUID.randomUUID(), orderString));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

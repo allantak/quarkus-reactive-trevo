@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class Product extends PanacheEntityBase {
+public class Product extends PanacheEntityBase implements Serializable {
 
     public Product(){
     }
