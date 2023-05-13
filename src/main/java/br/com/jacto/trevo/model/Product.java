@@ -7,13 +7,16 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Cacheable
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class Product extends PanacheEntityBase {
 
     public Product(){
@@ -41,8 +44,8 @@ public class Product extends PanacheEntityBase {
     private String culture;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> orders;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<OrderItem> orders = new ArrayList<>();
 
     public static Uni<Product> findByName(String productName){
         return find("productName", productName).firstResult();

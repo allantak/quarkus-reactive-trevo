@@ -7,15 +7,24 @@ import io.smallrye.mutiny.Uni;
 import io.vertx.pgclient.PgPool;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Entity
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class OrderItem extends PanacheEntityBase {
 
     public OrderItem() {}
+
+    public OrderItem(OrderItem orderItem) {
+        this.clientName = orderItem.clientName;
+        this.email = orderItem.email;
+        this.phone = orderItem.phone;
+        this.product = orderItem.product;
+    }
 
     public OrderItem(String clientName, String email, String phone, Product product){
         setEmail(email);
@@ -37,13 +46,12 @@ public class OrderItem extends PanacheEntityBase {
     private String phone;
 
     @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "productId", referencedColumnName = "productId")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "productId")
     private Product product;
+
 
     public static Uni<OrderItem> findByEmail(String email){
         return find("email", email).firstResult();
     }
-
-
 }
