@@ -41,8 +41,11 @@ public class OrderItemResource {
 
   @GET
   @Path("/{email}")
-  public Uni<OrderDto> getId(String email) {
-    return OrderItem.findByEmail(email).onItem().transform(OrderDto::new);
+  public Uni<Response> getId(String email) {
+    return orderItemRepository.findByEmail(email).onItem().ifNotNull().transform(order -> {
+      OrderDto orderDto = new OrderDto(order);
+      return Response.ok(orderDto).build();
+    } ).onItem().ifNull().continueWith(Response.status(Response.Status.NOT_FOUND).build());
   }
 
   @POST
@@ -52,27 +55,22 @@ public class OrderItemResource {
       .onItem()
       .transform(inserted ->
         Response
-          .created(URI.create("/product/" + inserted.getClientName()))
+          .created(URI.create("/product/" + inserted.getEmail()))
           .build()
       )
       .onItem()
-      .invoke(() -> sendMovieToKafka(orderItem));
+      .invoke(() -> sendOrderKafka(orderItem));
   }
 
   @DELETE
-  @Path("/{id}")
-  public Uni<Response> delete(UUID id) {
-    return orderItemRepository
-      .deleteById(id)
-      .onItem()
-      .transform(delete ->
-        delete
-          ? Response.noContent().build()
-          : Response.status(Response.Status.NOT_FOUND).build()
-      );
+  @Path("/{email}")
+  public Uni<Response> delete(String email) {
+    return orderItemRepository.findByEmail(email).onItem().ifNotNull().transformToUni(product ->
+            orderItemRepository.deleteByEmail(product.getEmail()).replaceWith(Response.noContent().build())
+    ).onItem().ifNull().continueWith(Response.status(Response.Status.NOT_FOUND).build());
   }
 
-  public void sendMovieToKafka(OrderItem orderItem) {
+  public void sendOrderKafka(OrderItem orderItem) {
     try {
       String orderString = OrderItem.convertToString(orderItem);
       emitter.send(Record.of(UUID.randomUUID(), orderString));

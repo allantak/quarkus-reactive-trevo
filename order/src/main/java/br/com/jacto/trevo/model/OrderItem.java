@@ -40,10 +40,6 @@ public class OrderItem extends PanacheEntityBase {
   @Column(nullable = false, unique = true)
   private String phone;
 
-  public static Uni<OrderItem> findByEmail(String email) {
-    return find("email", email).firstResult();
-  }
-
   public static String convertToString(OrderItem orderItem)
     throws JsonProcessingException {
     ObjectMapper objectMapper = new ObjectMapper();
