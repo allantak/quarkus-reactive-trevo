@@ -6,7 +6,10 @@ import br.com.jacto.trevo.repository.CultureRepository;
 import br.com.jacto.trevo.repository.ProductRepository;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
+import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
@@ -18,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Path("/culture")
 @WithSession
+@Authenticated
 public class CultureResource {
 
     @Inject
@@ -40,6 +44,7 @@ public class CultureResource {
     }
 
     @POST
+    @RolesAllowed("admin")
     public Uni<Response> create(CultureForm culture) {
         return productRepository.findByName(culture.getProductName())
                 .onItem().ifNotNull().transformToUni(product -> {

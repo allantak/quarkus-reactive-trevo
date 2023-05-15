@@ -6,8 +6,11 @@ import br.com.jacto.trevo.repository.OrderItemRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
+import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.reactive.messaging.kafka.Record;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
@@ -17,7 +20,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
-
+@Authenticated
 @Path("/order")
 @WithSession
 public class OrderItemResource {
@@ -30,6 +33,7 @@ public class OrderItemResource {
   Emitter<Record<UUID, String>> emitter;
 
   @GET
+  @RolesAllowed("admin")
   public Uni<List<OrderDto>> get() {
     return orderItemRepository
       .listAll()
@@ -72,6 +76,7 @@ public class OrderItemResource {
 
   public void sendOrderKafka(OrderItem orderItem) {
     try {
+      System.out.println("enviou");
       String orderString = OrderItem.convertToString(orderItem);
       emitter.send(Record.of(UUID.randomUUID(), orderString));
     } catch (JsonProcessingException e) {

@@ -20,12 +20,14 @@ public class OrderItem extends PanacheEntityBase {
     this.clientName = orderItem.clientName;
     this.email = orderItem.email;
     this.phone = orderItem.phone;
+    this.product = orderItem.product;
   }
 
-  public OrderItem(String clientName, String email, String phone) {
+  public OrderItem(String clientName, String email, String phone, String product) {
     setEmail(email);
     setPhone(phone);
     setClientName(clientName);
+    setProduct(product);
   }
 
   @Id
@@ -39,6 +41,8 @@ public class OrderItem extends PanacheEntityBase {
 
   @Column(nullable = false, unique = true)
   private String phone;
+
+  private String product;
 
   public static String convertToString(OrderItem orderItem)
     throws JsonProcessingException {

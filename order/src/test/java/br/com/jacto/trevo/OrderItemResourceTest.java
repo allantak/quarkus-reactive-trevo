@@ -33,7 +33,8 @@ public class OrderItemResourceTest {
                 .contentType(ContentType.JSON)
                 .body("email", equalTo(email))
                 .body("phone", equalTo("999"))
-                .body("clientName", equalTo("allan"));
+                .body("clientName", equalTo("allan"))
+                .body("product", equalTo("Uniport"));
     }
 
     @Test
@@ -52,6 +53,7 @@ public class OrderItemResourceTest {
         orderItem.setEmail("test@gmail.com");
         orderItem.setPhone("9999");
         orderItem.setClientName("test");
+        orderItem.setProduct("Uniport");
 
         given()
                 .contentType(ContentType.JSON)

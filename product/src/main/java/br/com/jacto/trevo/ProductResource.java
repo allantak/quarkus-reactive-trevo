@@ -6,8 +6,11 @@ import br.com.jacto.trevo.model.Culture;
 import br.com.jacto.trevo.repository.ProductRepository;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
+import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.reactive.messaging.kafka.Record;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import br.com.jacto.trevo.model.Product;
@@ -23,23 +26,17 @@ import java.util.UUID;
 @WithSession
 public class ProductResource {
 
-    private final Logger logger = Logger.getLogger(Culture.class);
-
     @Inject
     ProductRepository productRepository;
 
-    @Incoming("products-in")
-    public void receive(Record<UUID, String> record) {
-        System.out.println(record.key());
-        System.out.println(record.value());
-    }
-
     @GET
+    @Authenticated
     public Uni<List<ProductDto>> get() {
         return productRepository.listAll().onItem().transform(products -> products.stream().map(ProductDto::new).toList());
     }
 
     @GET
+    @Authenticated
     @Path("/{productName}")
     public Uni<Response> getProductName(String productName) {
         return productRepository.findByName(productName)
@@ -52,6 +49,7 @@ public class ProductResource {
 
 
     @POST
+    @RolesAllowed("admin")
     public Uni<Response> create(Product product) {
         return Panache.<Product>withTransaction(product::persist)
                 .onItem().transform(inserted -> Response.created(URI.create("/product/" + inserted.getProductName())).build());
@@ -59,10 +57,16 @@ public class ProductResource {
 
     @DELETE
     @Path("/{productName}")
+    @RolesAllowed("admin")
     public Uni<Response> delete(String productName) {
         return productRepository.findByName(productName).onItem().ifNotNull().transformToUni(product ->
                 productRepository.deleteByName(product.getProductName()).replaceWith(Response.noContent().build())
                 ).onItem().ifNull().continueWith(Response.status(Response.Status.NOT_FOUND).build());
     }
 
+    @Incoming("products-in")
+    public void receive(Record<UUID, String> record) {
+        System.out.println(record.key());
+        System.out.println(record.value());
+    }
 }

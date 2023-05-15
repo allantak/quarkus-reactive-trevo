@@ -12,6 +12,7 @@ public class OrderDto {
         setPhone(orderItem.getPhone());
         setEmail(orderItem.getEmail());
         setClientName(orderItem.getClientName());
+        setProduct(orderItem.getProduct());
     }
 
     private String clientName;
@@ -19,5 +20,7 @@ public class OrderDto {
     private String email;
 
     private String phone;
+
+    private String product;
 
 }
