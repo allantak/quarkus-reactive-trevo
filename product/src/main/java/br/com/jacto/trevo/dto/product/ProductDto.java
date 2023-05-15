@@ -1,13 +1,7 @@
 package br.com.jacto.trevo.dto.product;
 
-import br.com.jacto.trevo.dto.orderItem.OrderDto;
-import br.com.jacto.trevo.model.OrderItem;
 import br.com.jacto.trevo.model.Product;
-import jakarta.persistence.Column;
 import lombok.Data;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 public class ProductDto {
@@ -18,7 +12,6 @@ public class ProductDto {
         this.productName = product.getProductName();
         this.areaSize = product.getAreaSize();
         this.description = product.getDescription();
-        this.culture = product.getCulture();
     }
 
 
@@ -28,6 +21,5 @@ public class ProductDto {
 
     private String description;
 
-    private String culture;
 
 }

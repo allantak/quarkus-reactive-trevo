@@ -13,4 +13,10 @@ public class ProductRepository implements PanacheRepositoryBase<Product, UUID> {
     public Uni<Product> findByName(String productName){
         return find("productName", productName).firstResult();
     }
+
+    public Uni<Long> deleteByName(String productName) {
+        return delete("productName", productName);
+    }
+
+
 }

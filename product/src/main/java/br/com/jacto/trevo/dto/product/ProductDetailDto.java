@@ -1,7 +1,7 @@
 package br.com.jacto.trevo.dto.product;
 
-import br.com.jacto.trevo.dto.orderItem.OrderDto;
-import br.com.jacto.trevo.model.OrderItem;
+import br.com.jacto.trevo.model.Culture;
+import br.com.jacto.trevo.model.Product;
 import lombok.Data;
 
 import java.util.List;
@@ -11,12 +11,11 @@ public class ProductDetailDto {
     public ProductDetailDto() {
     }
 
-    public ProductDetailDto(String productName, Double areaSize, String description, String culture, List<OrderItem> orders ) {
-        this.productName = productName;
-        this.areaSize = areaSize;
-        this.description = description;
-        this.culture = culture;
-        this.orders = orders.stream().map(OrderDto::new).collect(Collectors.toList());
+    public ProductDetailDto(Product product) {
+        this.productName = product.getProductName();
+        this.areaSize = product.getAreaSize();
+        this.description = product.getDescription();
+        this.cultures = product.getCultures().stream().map(Culture::new).collect(Collectors.toList());
     }
 
     private String productName;
@@ -25,7 +24,5 @@ public class ProductDetailDto {
 
     private String description;
 
-    private String culture;
-
-    private List<OrderDto> orders;
+    private List<Culture> cultures;
 }

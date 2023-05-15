@@ -1,7 +1,6 @@
 package br.com.jacto.trevo.dto;
 
 import br.com.jacto.trevo.model.OrderItem;
-import jakarta.persistence.Column;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

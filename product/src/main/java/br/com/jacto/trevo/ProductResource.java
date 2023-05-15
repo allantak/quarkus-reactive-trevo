@@ -2,7 +2,7 @@ package br.com.jacto.trevo;
 
 import br.com.jacto.trevo.dto.product.ProductDetailDto;
 import br.com.jacto.trevo.dto.product.ProductDto;
-import br.com.jacto.trevo.model.OrderItem;
+import br.com.jacto.trevo.model.Culture;
 import br.com.jacto.trevo.repository.ProductRepository;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
@@ -11,23 +11,28 @@ import io.smallrye.reactive.messaging.kafka.Record;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import br.com.jacto.trevo.model.Product;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
-import org.hibernate.reactive.mutiny.Mutiny;
 import org.jboss.logging.Logger;
 
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Path("/product")
 @WithSession
 public class ProductResource {
 
+    private final Logger logger = Logger.getLogger(Culture.class);
+
     @Inject
     ProductRepository productRepository;
+
+    @Incoming("products-in")
+    public void receive(Record<UUID, String> record) {
+        System.out.println(record.key());
+        System.out.println(record.value());
+    }
 
     @GET
     public Uni<List<ProductDto>> get() {
@@ -36,10 +41,15 @@ public class ProductResource {
 
     @GET
     @Path("/{productName}")
-    public Uni<ProductDetailDto> getProductName(String productName){
+    public Uni<Response> getProductName(String productName) {
         return productRepository.findByName(productName)
-                .onItem().transform(product -> new ProductDetailDto(product.getProductName(),product.getAreaSize(),product.getDescription(),product.getCulture(), product.getOrders()));
+                .onItem().ifNotNull().transform(product -> {
+                    ProductDetailDto productDto = new ProductDetailDto(product);
+                    return Response.ok(productDto).build();
+                })
+                .onItem().ifNull().continueWith(() -> Response.status(Response.Status.NOT_FOUND).build());
     }
+
 
     @POST
     public Uni<Response> create(Product product) {
@@ -48,20 +58,11 @@ public class ProductResource {
     }
 
     @DELETE
-    @Path("/{id}")
-    public Uni<Response> delete(UUID id) {
-        return productRepository.deleteById(id).onItem().transform(delete -> delete ? Response.noContent().build() :
-                Response.status(Response.Status.NOT_FOUND).build());
+    @Path("/{productName}")
+    public Uni<Response> delete(String productName) {
+        return productRepository.findByName(productName).onItem().ifNotNull().transformToUni(product ->
+                productRepository.deleteByName(product.getProductName()).replaceWith(Response.noContent().build())
+                ).onItem().ifNull().continueWith(Response.status(Response.Status.NOT_FOUND).build());
     }
-
-
-    private final Logger logger = Logger.getLogger(OrderItem.class);
-
-    @Incoming("products-in")
-    public void receive(Record<UUID, String> record) {
-        System.out.println(record.key());
-        System.out.println(record.value());
-    }
-
 
 }

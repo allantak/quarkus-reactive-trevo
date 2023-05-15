@@ -23,12 +23,11 @@ public class Product extends PanacheEntityBase implements Serializable {
     public Product(){
     }
 
-    public Product(UUID productId, String productName, Double areaSize, String description, String culture){
+    public Product(UUID productId, String productName, Double areaSize, String description){
         setProductId(productId);
         setProductName(productName);
         setAreaSize(areaSize);
         setDescription(description);
-        setCulture(culture);
     }
 
     @Id
@@ -42,11 +41,10 @@ public class Product extends PanacheEntityBase implements Serializable {
 
     private String description;
 
-    private String culture;
-
     @JsonIgnore
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<OrderItem> orders = new ArrayList<>();
+    private List<Culture> cultures;
+
 
     public static Uni<Product> findByName(String productName){
         return find("productName", productName).firstResult();
