@@ -13,6 +13,7 @@ import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import org.jboss.logging.Logger;
 
 import java.net.URI;
 import java.util.List;
@@ -30,16 +31,21 @@ public class CultureResource {
     @Inject
     ProductRepository productRepository;
 
+    private static final Logger LOG = Logger.getLogger(CultureResource.class);
+
     @GET
     public Uni<List<Culture>> get() {
-        return cultureRepository.listAll().onItem().transform(orderItems -> orderItems.stream().map(Culture::new).collect(Collectors.toList()));
+        return cultureRepository.listAll()
+                .onItem().transform(orderItems -> orderItems.stream().map(Culture::new).collect(Collectors.toList()))
+                .onItem().invoke(LOG::info);
     }
 
     @GET
     @Path("/{id}")
     public Uni<Response> getId(UUID id) {
         return cultureRepository.findById(id)
-                .onItem().ifNotNull().transform(culture -> Response.ok(new Culture(culture)).build())
+                .onItem().ifNotNull().transform(culture -> Response.ok(culture).build())
+                .onItem().invoke(LOG::info)
                 .onItem().ifNull().continueWith(() -> Response.status(Response.Status.NOT_FOUND).build());
     }
 
@@ -49,6 +55,7 @@ public class CultureResource {
         return productRepository.findByName(culture.getProductName())
                 .onItem().ifNotNull().transformToUni(product -> {
                     Culture newCulture = new Culture(culture.getCultureName(), product);
+                    LOG.infof("New Culture: %s", newCulture); // Adiciona o log com as informações do objeto newCulture
                     return Panache.withTransaction(newCulture::persist)
                             .replaceWith(Response.created(URI.create("/culture/" + newCulture.getCultureId())).build());
                 })
@@ -60,6 +67,7 @@ public class CultureResource {
     public Uni<Response> delete(UUID id) {
         return cultureRepository.findById(id)
                 .onItem().ifNotNull().transformToUni(culture -> {
+                    LOG.infof("delete Culture: %s", culture);
                     return Panache.withTransaction(() -> cultureRepository.delete("id", id))
                             .replaceWith(Response.noContent().build());
                 })

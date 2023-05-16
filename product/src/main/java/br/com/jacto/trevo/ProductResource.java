@@ -29,10 +29,14 @@ public class ProductResource {
     @Inject
     ProductRepository productRepository;
 
+    private static final Logger LOG = Logger.getLogger(CultureResource.class);
+
     @GET
     @Authenticated
     public Uni<List<ProductDto>> get() {
-        return productRepository.listAll().onItem().transform(products -> products.stream().map(ProductDto::new).toList());
+        return productRepository.listAll()
+                .onItem().transform(products -> products.stream().map(ProductDto::new).toList())
+                .onItem().invoke(LOG::info);
     }
 
     @GET
@@ -42,6 +46,7 @@ public class ProductResource {
         return productRepository.findByName(productName)
                 .onItem().ifNotNull().transform(product -> {
                     ProductDetailDto productDto = new ProductDetailDto(product);
+                    LOG.info(productDto);
                     return Response.ok(productDto).build();
                 })
                 .onItem().ifNull().continueWith(() -> Response.status(Response.Status.NOT_FOUND).build());
@@ -52,21 +57,27 @@ public class ProductResource {
     @RolesAllowed("admin")
     public Uni<Response> create(Product product) {
         return Panache.<Product>withTransaction(product::persist)
-                .onItem().transform(inserted -> Response.created(URI.create("/product/" + inserted.getProductName())).build());
+                .onItem().transform(inserted -> {
+                    LOG.info(inserted);
+                    return Response.created(URI.create("/product/" + inserted.getProductName())).build();
+                });
     }
 
     @DELETE
     @Path("/{productName}")
     @RolesAllowed("admin")
     public Uni<Response> delete(String productName) {
-        return productRepository.findByName(productName).onItem().ifNotNull().transformToUni(product ->
-                productRepository.deleteByName(product.getProductName()).replaceWith(Response.noContent().build())
-                ).onItem().ifNull().continueWith(Response.status(Response.Status.NOT_FOUND).build());
+        return productRepository.findByName(productName)
+                .onItem().ifNotNull().transformToUni(product -> {
+                    LOG.info(product);
+                    return productRepository.deleteByName(product.getProductName()).replaceWith(Response.noContent().build());
+                }
+        ).onItem().ifNull().continueWith(Response.status(Response.Status.NOT_FOUND).build());
     }
 
     @Incoming("products-in")
     public void receive(Record<UUID, String> record) {
-        System.out.println(record.key());
-        System.out.println(record.value());
+        LOG.info("Pedido feito, Id " + record.key());
+        LOG.info("Informação do pedido " + record.value());
     }
 }

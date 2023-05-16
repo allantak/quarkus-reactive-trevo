@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OrderDto {
 
-    public OrderDto(OrderItem orderItem){
+    public OrderDto(OrderItem orderItem) {
         setPhone(orderItem.getPhone());
         setEmail(orderItem.getEmail());
         setClientName(orderItem.getClientName());
