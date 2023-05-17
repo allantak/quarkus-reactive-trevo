@@ -19,13 +19,6 @@ public class OrderItem extends PanacheEntityBase {
     public OrderItem() {
     }
 
-    public OrderItem(OrderItem orderItem) {
-        this.clientName = orderItem.clientName;
-        this.email = orderItem.email;
-        this.phone = orderItem.phone;
-        this.product = orderItem.product;
-    }
-
     public OrderItem(String clientName, String email, String phone, String product) {
         setEmail(email);
         setPhone(phone);

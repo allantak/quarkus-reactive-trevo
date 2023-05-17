@@ -1,5 +1,6 @@
 package br.com.jacto.trevo;
 
+import br.com.jacto.trevo.dto.OrderCreateForm;
 import br.com.jacto.trevo.dto.OrderDto;
 import br.com.jacto.trevo.model.OrderItem;
 import br.com.jacto.trevo.repository.OrderItemRepository;
@@ -59,9 +60,10 @@ public class OrderItemResource {
     }
 
     @POST
-    public Uni<Response> create(OrderItem orderItem) {
+    public Uni<Response> create(OrderCreateForm orderItem) {
+        OrderItem orderItemSave = new OrderItem(orderItem.getClientName(), orderItem.getEmail(), orderItem.getPhone(), orderItem.getProduct());
         return Panache
-                .<OrderItem>withTransaction(orderItem::persist)
+                .<OrderItem>withTransaction(orderItemSave::persist)
                 .onItem()
                 .transform(inserted ->
                         {
@@ -71,7 +73,7 @@ public class OrderItemResource {
                         }
                 )
                 .onItem()
-                .invoke(() -> sendOrderKafka(orderItem));
+                .invoke(() -> sendOrderKafka(orderItemSave));
     }
 
     @DELETE

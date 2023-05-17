@@ -8,7 +8,7 @@ import lombok.Data;
 public class OrderCreateForm {
 
     @NotBlank(message = "Deve colocar o nome do produto")
-    private String productName;
+    private String product;
 
     @NotBlank(message = "Deve se colocar o nome do cliente")
     private String clientName;
