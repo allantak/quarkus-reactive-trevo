@@ -1,5 +1,6 @@
 package br.com.jacto.trevo;
 
+import br.com.jacto.trevo.dto.culture.CultureDto;
 import br.com.jacto.trevo.dto.culture.CultureForm;
 import br.com.jacto.trevo.model.Culture;
 import br.com.jacto.trevo.repository.CultureRepository;
@@ -41,9 +42,9 @@ public class CultureResource {
     private static final Logger LOG = Logger.getLogger(CultureResource.class);
 
     @GET
-    public Uni<List<Culture>> get() {
+    public Uni<List<CultureDto>> get() {
         return cultureRepository.listAll()
-                .onItem().transform(orderItems -> orderItems.stream().map(Culture::new).collect(Collectors.toList()))
+                .onItem().transform(orderItems -> orderItems.stream().map(CultureDto::new).collect(Collectors.toList()))
                 .onItem().invoke(LOG::info);
     }
 
@@ -51,7 +52,10 @@ public class CultureResource {
     @Path("/{id}")
     public Uni<Response> getId(UUID id) {
         return cultureRepository.findById(id)
-                .onItem().ifNotNull().transform(culture -> Response.ok(culture).build())
+                .onItem().ifNotNull().transform(culture -> {
+                    CultureDto cultureDto = new CultureDto(culture);
+                    return Response.ok(cultureDto).build();
+                })
                 .onItem().invoke(LOG::info)
                 .onItem().ifNull().continueWith(() -> Response.status(Response.Status.NOT_FOUND).build());
     }
