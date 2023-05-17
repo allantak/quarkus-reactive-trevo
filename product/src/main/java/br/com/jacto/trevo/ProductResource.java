@@ -2,6 +2,7 @@ package br.com.jacto.trevo;
 
 import br.com.jacto.trevo.dto.product.ProductDetailDto;
 import br.com.jacto.trevo.dto.product.ProductDto;
+import br.com.jacto.trevo.dto.product.ProductForm;
 import br.com.jacto.trevo.model.Culture;
 import br.com.jacto.trevo.repository.ProductRepository;
 import io.quarkus.hibernate.reactive.panache.Panache;
@@ -12,6 +13,10 @@ import io.smallrye.reactive.messaging.kafka.Record;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import jakarta.ws.rs.*;
 import br.com.jacto.trevo.model.Product;
 import jakarta.ws.rs.core.Response;
@@ -20,6 +25,7 @@ import org.jboss.logging.Logger;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Path("/product")
@@ -28,6 +34,9 @@ public class ProductResource {
 
     @Inject
     ProductRepository productRepository;
+
+    @Inject
+    Validator validator;
 
     private static final Logger LOG = Logger.getLogger(CultureResource.class);
 
@@ -55,8 +64,13 @@ public class ProductResource {
 
     @POST
     @RolesAllowed("admin")
-    public Uni<Response> create(Product product) {
-        return Panache.<Product>withTransaction(product::persist)
+    public Uni<Response> create(@Valid ProductForm product) {
+        Set<ConstraintViolation<ProductForm>> violations = validator.validate(product);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException("Validation failed", violations);
+        }
+        Product productSave = new Product(product.getProductName(), product.getAreaSize(), product.getDescription());
+        return Panache.<Product>withTransaction(productSave::persist)
                 .onItem().transform(inserted -> {
                     LOG.info(inserted);
                     return Response.created(URI.create("/product/" + inserted.getProductName())).build();

@@ -9,14 +9,18 @@ import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -30,6 +34,9 @@ public class CultureResource {
 
     @Inject
     ProductRepository productRepository;
+
+    @Inject
+    Validator validator;
 
     private static final Logger LOG = Logger.getLogger(CultureResource.class);
 
@@ -51,11 +58,15 @@ public class CultureResource {
 
     @POST
     @RolesAllowed("admin")
-    public Uni<Response> create(CultureForm culture) {
+    public Uni<Response> create(@Valid CultureForm culture) {
+        Set<ConstraintViolation<CultureForm>> violations = validator.validate(culture);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException("Validation failed", violations);
+        }
         return productRepository.findByName(culture.getProductName())
                 .onItem().ifNotNull().transformToUni(product -> {
                     Culture newCulture = new Culture(culture.getCultureName(), product);
-                    LOG.infof("New Culture: %s", newCulture); // Adiciona o log com as informações do objeto newCulture
+                    LOG.infof("New Culture: %s", newCulture);
                     return Panache.withTransaction(newCulture::persist)
                             .replaceWith(Response.created(URI.create("/culture/" + newCulture.getCultureId())).build());
                 })

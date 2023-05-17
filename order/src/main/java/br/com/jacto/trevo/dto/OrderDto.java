@@ -1,6 +1,7 @@
 package br.com.jacto.trevo.dto;
 
 import br.com.jacto.trevo.model.OrderItem;
+import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

@@ -23,8 +23,7 @@ public class Product extends PanacheEntityBase implements Serializable {
     public Product(){
     }
 
-    public Product(UUID productId, String productName, Double areaSize, String description){
-        setProductId(productId);
+    public Product(String productName, Double areaSize, String description){
         setProductName(productName);
         setAreaSize(areaSize);
         setDescription(description);

@@ -12,29 +12,38 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.reactive.messaging.kafka.Record;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.jboss.logging.Logger;
 
+
 @Authenticated
 @Path("/order")
 @WithSession
 public class OrderItemResource {
-
     @Inject
     OrderItemRepository orderItemRepository;
 
     @Inject
     @Channel("products-out")
     Emitter<Record<UUID, String>> emitter;
+
+    @Inject
+    Validator validator;
 
     private static final Logger LOG = Logger.getLogger(OrderItemResource.class);
 
@@ -60,18 +69,19 @@ public class OrderItemResource {
     }
 
     @POST
-    public Uni<Response> create(OrderCreateForm orderItem) {
+    public Uni<Response> create(@Valid OrderCreateForm orderItem) {
+        Set<ConstraintViolation<OrderCreateForm>> violations = validator.validate(orderItem);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException("Validation failed", violations);
+        }
         OrderItem orderItemSave = new OrderItem(orderItem.getClientName(), orderItem.getEmail(), orderItem.getPhone(), orderItem.getProduct());
         return Panache
                 .<OrderItem>withTransaction(orderItemSave::persist)
                 .onItem()
-                .transform(inserted ->
-                        {
-                            LOG.info(inserted);
-                            return Response.created(URI.create("/product/" + inserted.getEmail()))
-                                    .build();
-                        }
-                )
+                .transform(inserted -> {
+                    LOG.info(inserted);
+                    return Response.created(URI.create("/product/" + inserted.getEmail())).build();
+                })
                 .onItem()
                 .invoke(() -> sendOrderKafka(orderItemSave));
     }
@@ -89,7 +99,6 @@ public class OrderItemResource {
 
     public void sendOrderKafka(OrderItem orderItem) {
         try {
-            System.out.println("enviou");
             String orderString = OrderItem.convertToString(orderItem);
             emitter.send(Record.of(UUID.randomUUID(), orderString));
         } catch (JsonProcessingException e) {
