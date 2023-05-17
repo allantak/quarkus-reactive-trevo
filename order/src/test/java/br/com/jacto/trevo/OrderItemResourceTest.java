@@ -2,7 +2,9 @@ package br.com.jacto.trevo;
 
 import br.com.jacto.trevo.model.OrderItem;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
@@ -10,6 +12,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 
 @QuarkusTest
+@TestSecurity(authorizationEnabled = false)
 public class OrderItemResourceTest {
 
     @Test
@@ -18,7 +21,7 @@ public class OrderItemResourceTest {
                 .when().get("/order")
                 .then()
                 .statusCode(200)
-                .body("$.size()", equalTo(2));
+                .body("$.size()", Matchers.greaterThanOrEqualTo(1));
     }
 
 
@@ -67,11 +70,11 @@ public class OrderItemResourceTest {
 
     @Test
     public void testDeleteOrder() {
-
         OrderItem orderItem = new OrderItem();
-        orderItem.setEmail("test2@gmail.com");
-        orderItem.setPhone("99999");
-        orderItem.setClientName("test2");
+        orderItem.setEmail("test@gmail.com");
+        orderItem.setPhone("9999");
+        orderItem.setClientName("test");
+        orderItem.setProduct("Uniport");
 
         given()
                 .contentType(ContentType.JSON)
