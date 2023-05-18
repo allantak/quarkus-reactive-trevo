@@ -10,7 +10,7 @@ import java.util.UUID;
 @ApplicationScoped
 public class ProductRepository implements PanacheRepositoryBase<Product, UUID> {
 
-    public Uni<Product> findByName(String productName){
+    public Uni<Product> findByName(String productName) {
         return find("productName", productName).firstResult();
     }
 

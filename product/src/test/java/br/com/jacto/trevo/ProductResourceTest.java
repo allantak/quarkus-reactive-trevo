@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
 
 @QuarkusTest
 @TestSecurity(authorizationEnabled = false)
@@ -16,10 +15,10 @@ public class ProductResourceTest {
     @Test
     public void testListProduct() {
         given()
-          .when().get("/product")
-          .then()
-             .statusCode(200)
-             .body("$.size()", equalTo(1));
+                .when().get("/product")
+                .then()
+                .statusCode(200)
+                .body("$.size()", equalTo(1));
     }
 
     @Test
@@ -79,7 +78,7 @@ public class ProductResourceTest {
     }
 
     @Test
-    public void testDeleteProductEndpointNotFound(){
+    public void testDeleteProductEndpointNotFound() {
         given()
                 .contentType(ContentType.JSON)
                 .body("{\"productName\": \"example3\", \"description\": \"Example description3\", \"areaSize\": \"200\"}")

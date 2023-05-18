@@ -6,8 +6,6 @@ import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 
@@ -16,7 +14,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 public class CultureResourceTest {
 
     @Test
-    public void testGetAllCulturesEndpoint(){
+    public void testGetAllCulturesEndpoint() {
         given()
                 .when().get("/culture")
                 .then()
@@ -26,7 +24,7 @@ public class CultureResourceTest {
     }
 
     @Test
-    public void testGetIdCultureEndpoint(){
+    public void testGetIdCultureEndpoint() {
         given()
                 .when().get("/culture/61f25068-1ff6-42c8-8de5-211dceb56449")
                 .then()
@@ -37,7 +35,7 @@ public class CultureResourceTest {
     }
 
     @Test
-    public void testGetIdCultureEndpointNotFound(){
+    public void testGetIdCultureEndpointNotFound() {
         given()
                 .when().get("/culture/nonexistent")
                 .then()
@@ -90,7 +88,6 @@ public class CultureResourceTest {
                 .then()
                 .statusCode(404);
     }
-
 
 
 }

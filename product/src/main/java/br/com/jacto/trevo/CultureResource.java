@@ -15,8 +15,14 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.logging.Logger;
 
 import java.net.URI;
@@ -30,18 +36,16 @@ import java.util.stream.Collectors;
 @Authenticated
 public class CultureResource {
 
+    private static final Logger LOG = Logger.getLogger(CultureResource.class);
     @Inject
     CultureRepository cultureRepository;
-
     @Inject
     ProductRepository productRepository;
-
     @Inject
     Validator validator;
 
-    private static final Logger LOG = Logger.getLogger(CultureResource.class);
-
     @GET
+    @Operation(summary = "Lista de cultura")
     public Uni<List<CultureDto>> get() {
         return cultureRepository.listAll()
                 .onItem().transform(orderItems -> orderItems.stream().map(CultureDto::new).collect(Collectors.toList()))
@@ -50,6 +54,10 @@ public class CultureResource {
 
     @GET
     @Path("/{id}")
+    @Operation(summary = "Cultura especifica")
+    @APIResponses(value = {
+            @APIResponse(responseCode = "404", description = "Not found")
+    })
     public Uni<Response> getId(UUID id) {
         return cultureRepository.findById(id)
                 .onItem().ifNotNull().transform(culture -> {
@@ -62,6 +70,11 @@ public class CultureResource {
 
     @POST
     @RolesAllowed("admin")
+    @Operation(summary = "Cadastro de cultura",
+            description = "Somente permissao de admin pode acessar esse recurso")
+    @APIResponses(value = {
+            @APIResponse(responseCode = "201", description = "Created")
+    })
     public Uni<Response> create(@Valid CultureForm culture) {
         Set<ConstraintViolation<CultureForm>> violations = validator.validate(culture);
         if (!violations.isEmpty()) {
@@ -79,6 +92,12 @@ public class CultureResource {
 
     @DELETE
     @Path("/{id}")
+    @Operation(summary = "Delete de cultura",
+            description = "Somente permissao de admin pode acessar esse recurso")
+    @APIResponses(value = {
+            @APIResponse(responseCode = "204", description = "Not content"),
+            @APIResponse(responseCode = "404", description = "Not found")
+    })
     public Uni<Response> delete(UUID id) {
         return cultureRepository.findById(id)
                 .onItem().ifNotNull().transformToUni(culture -> {

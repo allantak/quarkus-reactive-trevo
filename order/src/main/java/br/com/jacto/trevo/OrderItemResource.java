@@ -26,6 +26,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.jboss.logging.Logger;
@@ -49,6 +52,11 @@ public class OrderItemResource {
 
     @GET
     @RolesAllowed("admin")
+    @Operation(summary = "Listagem de todos os pedidos",
+            description = "Somente permissao de admin pode acessar esse recurso")
+    @APIResponses(value = {
+            @APIResponse(responseCode = "200", description = "Created")
+    })
     public Uni<List<OrderDto>> get() {
         return orderItemRepository
                 .listAll()
@@ -60,6 +68,10 @@ public class OrderItemResource {
 
     @GET
     @Path("/{email}")
+    @Operation(summary = "Pedido especifico")
+    @APIResponses(value = {
+            @APIResponse(responseCode = "404", description = "Not found")
+    })
     public Uni<Response> getId(String email) {
         return orderItemRepository.findByEmail(email).onItem().ifNotNull().transform(order -> {
             OrderDto orderDto = new OrderDto(order);
@@ -69,6 +81,10 @@ public class OrderItemResource {
     }
 
     @POST
+    @Operation(summary = "Cadastra um pedido")
+    @APIResponses(value = {
+            @APIResponse(responseCode = "201", description = "Created")
+    })
     public Uni<Response> create(@Valid OrderCreateForm orderItem) {
         Set<ConstraintViolation<OrderCreateForm>> violations = validator.validate(orderItem);
         if (!violations.isEmpty()) {
@@ -88,6 +104,10 @@ public class OrderItemResource {
 
     @DELETE
     @Path("/{email}")
+    @Operation(summary = "Deletar um pedido")
+    @APIResponses(value = {
+            @APIResponse(responseCode = "204", description = "No Content")
+    })
     public Uni<Response> delete(String email) {
         return orderItemRepository.findByEmail(email).onItem().ifNotNull().transformToUni(product ->
                 {

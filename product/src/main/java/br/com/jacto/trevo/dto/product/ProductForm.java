@@ -1,13 +1,8 @@
 package br.com.jacto.trevo.dto.product;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-import java.util.UUID;
 @Data
 public class ProductForm {
 

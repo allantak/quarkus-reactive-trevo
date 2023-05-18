@@ -5,6 +5,10 @@ import lombok.Data;
 
 @Data
 public class ProductDto {
+    private String productName;
+    private Double areaSize;
+    private String description;
+
     public ProductDto() {
     }
 
@@ -13,13 +17,6 @@ public class ProductDto {
         this.areaSize = product.getAreaSize();
         this.description = product.getDescription();
     }
-
-
-    private String productName;
-
-    private Double areaSize;
-
-    private String description;
 
 
 }

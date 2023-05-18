@@ -6,6 +6,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ConfigResult {
+    private String message;
+    private boolean success;
+
     public ConfigResult(String message) {
         this.success = true;
         this.message = message;
@@ -17,9 +20,6 @@ public class ConfigResult {
                 .map(cv -> cv.getMessage())
                 .collect(Collectors.joining(", "));
     }
-
-    private String message;
-    private boolean success;
 
     public String getMessage() {
         return message;

@@ -6,8 +6,14 @@ import lombok.Data;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Data
 public class ProductDetailDto {
+    private String productName;
+    private Double areaSize;
+    private String description;
+    private List<Culture> cultures;
+
     public ProductDetailDto() {
     }
 
@@ -17,12 +23,4 @@ public class ProductDetailDto {
         this.description = product.getDescription();
         this.cultures = product.getCultures().stream().map(Culture::new).collect(Collectors.toList());
     }
-
-    private String productName;
-
-    private Double areaSize;
-
-    private String description;
-
-    private List<Culture> cultures;
 }

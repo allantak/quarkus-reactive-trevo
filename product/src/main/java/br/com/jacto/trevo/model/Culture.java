@@ -10,31 +10,30 @@ import java.util.UUID;
 
 @Entity
 @Data
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 public class Culture extends PanacheEntityBase {
 
-    public Culture() {}
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID cultureId;
+    @Column(nullable = true)
+    private String cultureName;
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "productId", referencedColumnName = "productId")
+    private Product product;
+
+    public Culture() {
+    }
 
     public Culture(Culture culture) {
         this.cultureId = culture.getCultureId();
         this.cultureName = culture.getCultureName();
     }
 
-    public Culture(String cultureName, Product product){
+    public Culture(String cultureName, Product product) {
         this.cultureName = cultureName;
         this.product = product;
     }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID cultureId;
-
-    @Column(nullable = true)
-    private String cultureName;
-
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "productId", referencedColumnName = "productId")
-    private Product product;
 
 }

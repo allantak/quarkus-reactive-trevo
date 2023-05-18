@@ -1,0 +1,23 @@
+
+version: '2'
+
+services:
+  trevo_product:
+    image: postgres:14.1
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=trevo_product
+    ports:
+      - 5432:5432
+
+  trevo_order:
+    image: postgres:14.1
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=trevo_order
+    ports:
+      - 5434:5432
