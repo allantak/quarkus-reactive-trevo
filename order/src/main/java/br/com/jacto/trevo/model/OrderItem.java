@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class OrderItem extends PanacheEntityBase {
+public class OrderItem{
 
     public OrderItem() {
     }

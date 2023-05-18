@@ -91,14 +91,8 @@ public class OrderItemResource {
             throw new ConstraintViolationException("Validation failed", violations);
         }
         OrderItem orderItemSave = new OrderItem(orderItem.getClientName(), orderItem.getEmail(), orderItem.getPhone(), orderItem.getProduct());
-        return Panache
-                .<OrderItem>withTransaction(orderItemSave::persist)
-                .onItem()
-                .transform(inserted -> {
-                    LOG.info(inserted);
-                    return Response.created(URI.create("/product/" + inserted.getEmail())).build();
-                })
-                .onItem()
+        return Panache.withTransaction(() -> orderItemRepository.persist(orderItemSave))
+                .replaceWith(Response.created(URI.create("/product/" + orderItemSave.getEmail())).build())
                 .invoke(() -> sendOrderKafka(orderItemSave));
     }
 

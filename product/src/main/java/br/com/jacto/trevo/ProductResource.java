@@ -82,7 +82,7 @@ public class ProductResource {
             throw new ConstraintViolationException("Validation failed", violations);
         }
         Product productSave = new Product(product.getProductName(), product.getAreaSize(), product.getDescription());
-        return Panache.<Product>withTransaction(productSave::persist)
+        return Panache.withTransaction(() -> productRepository.persist(productSave))
                 .onItem().transform(inserted -> {
                     LOG.info(inserted);
                     return Response.created(URI.create("/product/" + inserted.getProductName())).build();

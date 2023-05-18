@@ -14,7 +14,7 @@ import java.util.UUID;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class Product extends PanacheEntityBase implements Serializable {
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -34,10 +34,6 @@ public class Product extends PanacheEntityBase implements Serializable {
         setProductName(productName);
         setAreaSize(areaSize);
         setDescription(description);
-    }
-
-    public static Uni<Product> findByName(String productName) {
-        return find("productName", productName).firstResult();
     }
 
 }

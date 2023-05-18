@@ -84,7 +84,7 @@ public class CultureResource {
                 .onItem().ifNotNull().transformToUni(product -> {
                     Culture newCulture = new Culture(culture.getCultureName(), product);
                     LOG.infof("New Culture: %s", newCulture);
-                    return Panache.withTransaction(newCulture::persist)
+                    return Panache.withTransaction(() -> cultureRepository.persist(newCulture))
                             .replaceWith(Response.created(URI.create("/culture/" + newCulture.getCultureId())).build());
                 })
                 .onItem().ifNull().continueWith(Response.status(Response.Status.NOT_FOUND).build());

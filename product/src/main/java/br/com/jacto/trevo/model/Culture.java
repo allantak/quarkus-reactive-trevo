@@ -11,7 +11,7 @@ import java.util.UUID;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class Culture extends PanacheEntityBase {
+public class Culture {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
