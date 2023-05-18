@@ -63,7 +63,6 @@ Keycloak
 ```
 
 Kibana
-16686
 ```bash
   http://http://localhost:5601/
 ```
