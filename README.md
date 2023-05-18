@@ -26,7 +26,7 @@
 Instalar o ambiente de desenvolvimento
 
 ```bash
-  docker-compose up -d
+  docker-compose -f <nome-do-docker-compose.yaml> up -d
 ```
 
 Execultar Microserviço product e order
